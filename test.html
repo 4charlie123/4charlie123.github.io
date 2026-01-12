@@ -1,1 +1,452 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Charles Panguito | Portfolio Book</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0b0b16;
+    --card:#141427;
+    --accent:#00f7ff;
+    --accent-opaque: rgba(0,247,255,0.35);
+    --text:#ffffff;
+  }
+  *{box-sizing:border-box}
+  body{
+    margin:0;
+    font-family:'Poppins',sans-serif;
+    background:var(--bg);
+    color:var(--text);
+    -webkit-font-smoothing:antialiased;
+    -moz-osx-font-smoothing:grayscale;
+  }
 
+  .wrap{
+    width:94%;
+    max-width:980px;
+    margin:48px auto 90px;
+    position:relative;
+    perspective:2200px;
+  }
+
+  .book {
+    position:relative;
+    width:100%;
+    height:640px;
+    margin:0 auto;
+    transform-style:preserve-3d;
+  }
+
+  .page {
+    position:absolute;
+    inset:0;
+    width:100%;
+    height:100%;
+    background:linear-gradient(180deg,var(--card), #0f0f22);
+    border-radius:14px;
+    box-shadow:0 20px 50px rgba(0,0,0,0.6), 0 0 30px var(--accent-opaque);
+    padding:36px;
+    display:flex;
+    flex-direction:column;
+    gap:12px;
+    transform-origin: left center;
+    transition:transform 900ms cubic-bezier(.2,.9,.28,1), box-shadow 300ms;
+    transform-style:preserve-3d;
+    backface-visibility:hidden;
+    overflow:hidden;
+  }
+
+  /* stack order so earlier pages appear on top initially */
+  .page[data-index="0"]{z-index:100}
+  .page[data-index="1"]{z-index:90}
+  .page[data-index="2"]{z-index:80}
+  .page[data-index="3"]{z-index:70}
+  .page[data-index="4"]{z-index:60}
+  .page[data-index="5"]{z-index:50}
+  .page[data-index="6"]{z-index:40}
+
+  /* flipped state */
+  .flipped{
+    transform: rotateY(-180deg);
+    box-shadow:0 30px 80px rgba(0,0,0,0.7);
+  }
+
+  /* page backside style when flipped (so inner content doesn't show mirrored) */
+  .page .back {
+    position:absolute;
+    inset:0;
+    transform: rotateY(180deg);
+    backface-visibility:hidden;
+    padding:36px;
+  }
+
+  /* Content styling */
+  .profile-pic{
+    width:140px;
+    height:140px;
+    border-radius:50%;
+    object-fit:cover;
+    border:4px solid var(--accent);
+    box-shadow:0 0 24px var(--accent-opaque);
+    align-self:center;
+  }
+
+  h2{ color:var(--accent); margin:6px 0 8px; }
+  p{ color:#ddd; line-height:1.5; margin:0 0 8px; }
+
+  .skills-badges span{
+    display:inline-block;
+    background:var(--accent);
+    color:#000;
+    padding:8px 12px;
+    margin:6px 6px 6px 0;
+    border-radius:8px;
+    font-weight:700;
+  }
+
+  .timeline{
+    border-left:3px solid var(--accent);
+    padding-left:18px;
+  }
+  .timeline-item{ margin-bottom:18px; color:#ddd; }
+
+  .gallery img{
+    width:100%;
+    border-radius:12px;
+    margin-bottom:10px;
+    transition: transform .25s, box-shadow .25s;
+  }
+  .gallery img:hover{
+    transform:scale(1.03);
+    box-shadow:0 0 18px var(--accent-opaque);
+  }
+
+  /* bottom pagination/book navigator */
+  .navigator{
+    position:fixed;
+    left:50%;
+    transform:translateX(-50%);
+    bottom:18px;
+    background:linear-gradient(180deg, rgba(10,10,18,0.9), rgba(5,5,10,0.95));
+    padding:10px 14px;
+    border-radius:999px;
+    display:flex;
+    align-items:center;
+    gap:10px;
+    box-shadow:0 6px 30px rgba(0,0,0,0.6), 0 0 20px var(--accent-opaque);
+    z-index:9999;
+  }
+
+  .nav-btn{
+    background:transparent;
+    border:1px solid rgba(255,255,255,0.06);
+    color:#ddd;
+    padding:8px 12px;
+    border-radius:10px;
+    cursor:pointer;
+    min-width:42px;
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    transition:all .18s;
+    user-select:none;
+    font-weight:600;
+  }
+  .nav-btn:hover{ transform:translateY(-3px); box-shadow:0 6px 20px rgba(0,0,0,0.4); }
+
+  .page-list{
+    display:flex;
+    align-items:center;
+    gap:8px;
+    padding:0 6px;
+  }
+
+  .page-num{
+    background:transparent;
+    border:none;
+    color:#cfefff;
+    padding:6px 10px;
+    border-radius:8px;
+    cursor:pointer;
+    font-weight:700;
+    transition:all .18s;
+  }
+  .page-num:hover{ transform:translateY(-3px); color:#fff; }
+
+  .page-num.current{
+    background:linear-gradient(90deg, rgba(0,247,255,0.12), rgba(0,247,255,0.06));
+    color:var(--accent);
+    box-shadow:0 6px 18px rgba(0,247,255,0.08), 0 0 20px var(--accent-opaque);
+    transform:scale(1.06);
+  }
+
+  /* small screen tweaks */
+  @media (max-width:720px){
+    .wrap{ margin:24px auto 110px; }
+    .book{ height:520px; }
+    .page{ padding:20px; border-radius:12px }
+    .profile-pic{ width:110px; height:110px; }
+    .navigator{ bottom:12px; padding:8px; gap:6px; }
+  }
+
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <div class="book" id="book">
+    <!-- Page 0 -->
+    <article class="page" data-index="0">
+      <div class="front">
+        <img src="profile.png" alt="Charles" class="profile-pic">
+        <h2>Hi — I'm <span style="color:#fff">Charles Aaron Panguito</span></h2>
+        <h4 id="typing"> </h4>
+        <p>Welcome to my portfolio book. Flip through the pages to explore About, Skills, Projects, Education, Gallery and Contact.</p>
+      </div>
+      <div class="back"></div>
+    </article>
+
+    <!-- Page 1 -->
+    <article class="page" data-index="1">
+      <div class="front">
+        <h2>About Me</h2>
+        <p>BS Computer Science Graduate, Web Developer, IT Instructor, at Cyber Security enthusiast. Experienced in software, hardware troubleshooting, and social media account recovery.</p>
+      </div>
+      <div class="back"></div>
+    </article>
+
+    <!-- Page 2 -->
+    <article class="page" data-index="2">
+      <div class="front">
+        <h2>Skills</h2>
+        <div class="skills-badges">
+          <span>HTML</span><span>CSS</span><span>JavaScript</span><span>PHP</span><span>SQL</span>
+          <span>Python</span><span>Ethical Hacking</span><span>Pen Testing</span><span>PC Troubleshoot</span>
+        </div>
+      </div>
+      <div class="back"></div>
+    </article>
+
+    <!-- Page 3 -->
+    <article class="page" data-index="3">
+      <div class="front">
+        <h2>Projects</h2>
+        <p><strong>Student Attendance System</strong> — QR-based attendance with admin & teacher dashboards.</p>
+        <p><strong>Portfolio Website</strong> — Bootstrap portfolio hosted on GitHub Pages.</p>
+        <p><strong>Cyber Security Tools</strong> — Educational ethical hacking demos.</p>
+      </div>
+      <div class="back"></div>
+    </article>
+
+    <!-- Page 4 -->
+    <article class="page" data-index="4">
+      <div class="front">
+        <h2>Education</h2>
+        <div class="timeline">
+          <div class="timeline-item"><strong>2014 – 2018</strong><div>Bayugo National High School</div></div>
+          <div class="timeline-item"><strong>2018 – 2020</strong><div>ICT Strand – Bayugo National High School</div></div>
+          <div class="timeline-item"><strong>2020 – 2024</strong><div>BS Computer Science – Tomas Claudio Colleges</div></div>
+          <div class="timeline-item"><strong>2023</strong><div>Web Development OJT – Megaworld Corporation</div></div>
+          <div class="timeline-item"><strong>2025</strong><div>Ethical Hacking – NexusCloud IT Solutions</div></div>
+        </div>
+      </div>
+      <div class="back"></div>
+    </article>
+
+    <!-- Page 5 -->
+    <article class="page" data-index="5">
+      <div class="front">
+        <h2>Gallery</h2>
+        <div class="gallery">
+          <img src="https://images.unsplash.com/photo-1518770660439-4636190af475" alt="">
+          <img src="https://images.unsplash.com/photo-1519389950473-47ba0277781c" alt="">
+          <img src="https://images.unsplash.com/photo-1504384308090-c894fdcc538d" alt="">
+        </div>
+      </div>
+      <div class="back"></div>
+    </article>
+
+    <!-- Page 6 -->
+    <article class="page" data-index="6">
+      <div class="front">
+        <h2>Contact</h2>
+        <p>📞 0930 375 7533</p>
+        <p>📧 charlesaaronpanguito@gmail.com</p>
+        <p>📍 Jalajala, Rizal</p>
+      </div>
+      <div class="back"></div>
+    </article>
+
+  </div>
+</div>
+
+<!-- Navigator -->
+<div class="navigator" id="navigator" aria-hidden="false">
+  <button class="nav-btn" id="nav-prev" title="Previous page">◀</button>
+
+  <div class="page-list" id="page-list">
+    <!-- numbers inserted by JS -->
+  </div>
+
+  <button class="nav-btn" id="nav-next" title="Next page">▶</button>
+</div>
+
+<script>
+  // pages state and DOM
+  const pages = Array.from(document.querySelectorAll('.page'));
+  const total = pages.length;
+  let current = 0; // 0-based index
+
+  // DOM refs
+  const navPrev = document.getElementById('nav-prev');
+  const navNext = document.getElementById('nav-next');
+  const pageList = document.getElementById('page-list');
+
+  // initialize stacking order (higher index pages under earlier ones)
+  function resetZIndices(){
+    // highest z-index for page 0 so it sits on top at start
+    for(let i=0;i<pages.length;i++){
+      const el = pages[i];
+      // compute base z so earlier pages appear above later ones
+      el.style.zIndex = (100 - i);
+    }
+  }
+  resetZIndices();
+
+  // show page with flipping logic
+  function showPage(index){
+    current = Math.max(0, Math.min(index, total-1));
+
+    // flip pages that are before the current (i < current) -> flipped
+    pages.forEach((p,i)=>{
+      if(i < current){
+        p.classList.add('flipped');
+      } else {
+        p.classList.remove('flipped');
+      }
+    });
+
+    // ensure the topmost visible page has higher z for smooth animation
+    pages.forEach((p,i)=>{
+      // pages earlier than current should be on top in stacking context to show flipped edges
+      if(i < current){
+        p.style.zIndex = 200 - i; // earlier pages on top
+      } else {
+        p.style.zIndex = 50 + (total - i); // non-flipped lower
+      }
+    });
+
+    updateNavigator();
+  }
+
+  // update bottom navigator display (arrows + numbers)
+  function updateNavigator(){
+    pageList.innerHTML = '';
+
+    // display previous neighbor (if exists)
+    if(current - 1 >= 0){
+      const prevNum = document.createElement('button');
+      prevNum.className = 'page-num';
+      prevNum.textContent = (current).toString(); // show 1-based
+      prevNum.title = 'Go to page ' + (current);
+      prevNum.addEventListener('click', ()=> showPage(current-1));
+      pageList.appendChild(prevNum);
+    }
+
+    // current page (center)
+    const cur = document.createElement('button');
+    cur.className = 'page-num current';
+    cur.textContent = (current + 1).toString();
+    cur.title = 'Current page';
+    // allow clicking current to do nothing (or we can open preview)
+    pageList.appendChild(cur);
+
+    // display next neighbor (if exists)
+    if(current + 1 < total){
+      const nextNum = document.createElement('button');
+      nextNum.className = 'page-num';
+      nextNum.textContent = (current + 2).toString();
+      nextNum.title = 'Go to page ' + (current+2);
+      nextNum.addEventListener('click', ()=> showPage(current+1));
+      pageList.appendChild(nextNum);
+    }
+
+    // update prev/next arrow enabled state
+    navPrev.disabled = (current === 0);
+    navNext.disabled = (current === total - 1);
+
+    // subtle aria / visual update
+    navPrev.style.opacity = navPrev.disabled ? '0.4' : '1';
+    navNext.style.opacity = navNext.disabled ? '0.4' : '1';
+  }
+
+  // attach arrow handlers
+  navPrev.addEventListener('click', ()=> {
+    if(current > 0) showPage(current-1);
+  });
+  navNext.addEventListener('click', ()=> {
+    if(current < total-1) showPage(current+1);
+  });
+
+  // allow clicking numbers more than neighbors by expanding page-list on ctrl+click (optional)
+  // but for now only prev/current/next are shown as requested
+
+  // keyboard arrows support
+  document.addEventListener('keydown', (e)=>{
+    if(e.key === 'ArrowRight') {
+      if(current < total - 1) showPage(current+1);
+    } else if(e.key === 'ArrowLeft') {
+      if(current > 0) showPage(current-1);
+    }
+  });
+
+  // Typing effect on first page
+  const typingEl = document.getElementById('typing');
+  const text = ["Web Developer","IT Instructor","Cyber Security Enthusiast"];
+  let ti=0, tj=0, tc="";
+  function type(){
+    if(tj < text[ti].length){
+      tc += text[ti][tj++];
+      typingEl.innerText = tc;
+      setTimeout(type, 90);
+    } else {
+      setTimeout(erase, 1200);
+    }
+  }
+  function erase(){
+    if(tj>0){
+      tc = tc.slice(0,-1);
+      tj--;
+      typingEl.innerText = tc;
+      setTimeout(erase, 40);
+    } else {
+      ti = (ti + 1) % text.length;
+      setTimeout(type, 480);
+    }
+  }
+  type();
+
+  // initial render
+  showPage(0);
+
+  // optional: respond to click on page area (click right half => next, left half => prev)
+  document.getElementById('book').addEventListener('click', (e)=>{
+    // only if clicking empty space (not nav buttons)
+    const rect = e.currentTarget.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    if(e.target.closest('.nav-btn') || e.target.closest('.page-num')) return;
+    if(x > rect.width * 0.55) {
+      if(current < total - 1) showPage(current + 1);
+    } else if(x < rect.width * 0.45) {
+      if(current > 0) showPage(current - 1);
+    }
+  });
+
+  // make the page flip feel nicer on window resize (recalculate z-indices)
+  window.addEventListener('resize', ()=> resetZIndices());
+</script>
+
+</body>
+  </html>
