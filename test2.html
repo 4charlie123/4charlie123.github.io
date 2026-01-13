@@ -15,9 +15,6 @@
 <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
 
 <style>
-/* =========================
-   GLOBAL
-========================= */
 body{
   font-family:'Poppins',sans-serif;
   background:#0b0b16;
@@ -30,52 +27,43 @@ body{
 ========================= */
 #bg-canvas{
   position:fixed;
-  top:0;
-  left:0;
-  width:100%;
-  height:100%;
+  inset:0;
   z-index:-1;
   background:
-    radial-gradient(circle at top, #0f2027, #0b0b16 60%);
+    radial-gradient(circle at top, #0f2027, #0b0b16 65%);
 }
 
-/* subtle scanlines */
+/* SOFTER scanlines */
 body::after{
   content:"";
   position:fixed;
   inset:0;
   background:repeating-linear-gradient(
     to bottom,
-    rgba(255,255,255,0.02),
-    rgba(255,255,255,0.02) 1px,
+    rgba(255,255,255,0.01),
+    rgba(255,255,255,0.01) 1px,
     transparent 1px,
-    transparent 3px
+    transparent 4px
   );
   pointer-events:none;
   z-index:0;
 }
 
-/* glow aura */
+/* REDUCED glow aura */
 body::before{
   content:"";
   position:fixed;
   inset:0;
   background:
-    radial-gradient(circle at 50% 30%, #00f7ff15, transparent 60%);
+    radial-gradient(circle at 50% 30%, #00f7ff08, transparent 65%);
   z-index:-1;
 }
 
-/* =========================
-   NAV
-========================= */
 .navbar{
   background:rgba(0,0,0,.9);
   backdrop-filter:blur(6px);
 }
 
-/* =========================
-   HERO
-========================= */
 .hero{
   min-height:100vh;
   display:flex;
@@ -83,16 +71,14 @@ body::before{
 }
 .hero span{
   color:#00f7ff;
-  text-shadow:0 0 20px #00f7ff;
+  text-shadow:0 0 12px #00f7ff;
 }
 
-/* =========================
-   UI ELEMENTS
-========================= */
 .section-title{
   color:#00f7ff;
   font-weight:700;
 }
+
 .card{
   background:#141427;
   border:none;
@@ -100,29 +86,29 @@ body::before{
   transition:.4s;
 }
 .card:hover{
-  transform:translateY(-10px);
-  box-shadow:0 0 25px #00f7ff55;
+  transform:translateY(-8px);
+  box-shadow:0 0 18px #00f7ff33;
 }
+
 .badge-skill{
   background:#00f7ff;
   color:#000;
   padding:8px 12px;
   margin:4px;
 }
+
 .project-img{
   height:200px;
   object-fit:cover;
 }
 
-/* =========================
-   TIMELINE
-========================= */
 .timeline{
   position:relative;
   margin-left:20px;
   padding-left:30px;
-  border-left:3px solid #00f7ff;
+  border-left:2px solid #00f7ff;
 }
+
 .timeline-item{
   margin-bottom:30px;
   position:relative;
@@ -130,51 +116,35 @@ body::before{
 .timeline-item::before{
   content:'';
   position:absolute;
-  left:-38px;
-  top:5px;
-  width:16px;
-  height:16px;
+  left:-36px;
+  top:6px;
+  width:14px;
+  height:14px;
   background:#00f7ff;
   border-radius:50%;
-  box-shadow:0 0 15px #00f7ff;
+  box-shadow:0 0 10px #00f7ff66;
 }
 
-/* =========================
-   GALLERY
-========================= */
 .gallery img{
   border-radius:12px;
   transition:.3s;
 }
-.gallery img:hover{
-  transform:scale(1.05);
-  box-shadow:0 0 20px #00f7ff66;
-}
 
-/* =========================
-   FOOTER
-========================= */
 footer{
   background:#05050d;
 }
 
-/* =========================
-   BUTTON
-========================= */
 .glow-btn{
-  box-shadow:0 0 20px #00f7ff;
+  box-shadow:0 0 12px #00f7ff;
 }
 
-/* =========================
-   PROFILE IMAGE
-========================= */
 .profile-pic{
   width:160px;
   height:160px;
   object-fit:cover;
   border-radius:50%;
-  border:4px solid #00f7ff;
-  box-shadow:0 0 25px #00f7ff88;
+  border:3px solid #00f7ff;
+  box-shadow:0 0 18px #00f7ff66;
   margin-bottom:20px;
 }
 </style>
@@ -182,7 +152,6 @@ footer{
 
 <body>
 
-<!-- ANIMATED BACKGROUND CANVAS -->
 <canvas id="bg-canvas"></canvas>
 
 <!-- NAV -->
@@ -333,9 +302,7 @@ Experienced in software, hardware troubleshooting, and social media account reco
 <script>
 AOS.init({duration:1000});
 
-/* =========================
-   TYPING EFFECT
-========================= */
+/* typing */
 const text=[
 "Web Developer",
 "Senior High School Computer Instructor",
@@ -349,23 +316,23 @@ function type(){
 if(j<text[i].length){
 c+=text[i][j++];
 typing.innerHTML=c;
-setTimeout(type,100);
-}else setTimeout(erase,1500);
+setTimeout(type,90);
+}else setTimeout(erase,1400);
 }
 function erase(){
 if(j>0){
 c=c.slice(0,-1);
 j--;
 typing.innerHTML=c;
-setTimeout(erase,60);
+setTimeout(erase,50);
 }else{
 i=(i+1)%text.length;
-setTimeout(type,500);
+setTimeout(type,400);
 }}
 type();
 
 /* =========================
-   ANIMATED PARTICLES
+   SOFTER PARTICLES
 ========================= */
 const canvas=document.getElementById("bg-canvas");
 const ctx=canvas.getContext("2d");
@@ -377,13 +344,13 @@ h=canvas.height=window.innerHeight;
 window.addEventListener("resize",resize);
 resize();
 
-for(let i=0;i<120;i++){
+for(let i=0;i<100;i++){
 particles.push({
 x:Math.random()*w,
 y:Math.random()*h,
-vx:(Math.random()-0.5)*0.5,
-vy:(Math.random()-0.5)*0.5,
-r:Math.random()*2+1
+vx:(Math.random()-0.5)*0.3,
+vy:(Math.random()-0.5)*0.3,
+r:Math.random()*1.5+0.5
 });
 }
 
@@ -397,14 +364,14 @@ if(p.y<0||p.y>h) p.vy*=-1;
 
 ctx.beginPath();
 ctx.arc(p.x,p.y,p.r,0,Math.PI*2);
-ctx.fillStyle="#00f7ff";
+ctx.fillStyle="rgba(0,247,255,0.35)";
 ctx.fill();
 
 particles.forEach(q=>{
 let dx=p.x-q.x, dy=p.y-q.y;
 let dist=Math.sqrt(dx*dx+dy*dy);
-if(dist<120){
-ctx.strokeStyle="rgba(0,247,255,0.1)";
+if(dist<100){
+ctx.strokeStyle="rgba(0,247,255,0.05)";
 ctx.beginPath();
 ctx.moveTo(p.x,p.y);
 ctx.lineTo(q.x,q.y);
